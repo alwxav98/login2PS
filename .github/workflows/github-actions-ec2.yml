@@ -38,6 +38,7 @@ jobs:
             docker pull alevm98/apploginps:latest
             docker stop loginps || true
             docker rm loginps || true
-            docker run -d --name loginps --network host alevm98/apploginps:latest
-
+            docker run -d --name loginps --restart always --network host alevm98/apploginps:latest
+            docker image prune -f
             echo "Desplegado en ${{ secrets.HOST_DNS }}"
+
