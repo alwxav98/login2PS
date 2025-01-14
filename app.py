@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Configuración de conexión a MySQL
 DB_CONFIG = {
-    "host": "ec2-18-207-77-6.compute-1.amazonaws.com",  # Cambiar a la IP de la instancia con MySQL
+    "host": "ec2-18-207-77-6.compute-1.amazonaws.com",  # Elastic IP de la instancia con MySQL
     "user": "root",  # Usuario de MySQL
     "password": "claveSegura123@",  # Contraseña de MySQL
     "database": "loginPS"  # Base de datos
@@ -42,6 +42,9 @@ def verify_user(email, password):
 
 @app.route("/", methods=["GET", "POST"])
 def login():
+    """
+    Muestra el formulario de login y procesa las credenciales ingresadas.
+    """
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
@@ -49,13 +52,18 @@ def login():
         if verify_user(email, password):
             return redirect(url_for("success"))
         else:
-            return "Email o contraseña incorrectos", 401  # Código 401 para autenticación fallida
+            return render_template("login.html", error="Email o contraseña incorrectos")
 
+    # Renderiza la plantilla HTML para login
     return render_template("login.html")
 
 @app.route("/success")
 def success():
+    """
+    Muestra la página de éxito tras el inicio de sesión exitoso.
+    """
     return "¡Inicio de sesión exitoso!"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
