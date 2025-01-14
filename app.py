@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Configuración de conexión a MySQL
 DB_CONFIG = {
-    "host": "ec2-54-163-208-235.compute-1.amazonaws.com",  # Cambiar a la IP de la instancia con MySQL
+    "host": "ec2-18-207-77-6.compute-1.amazonaws.com",  # Cambiar a la IP de la instancia con MySQL
     "user": "root",  # Usuario de MySQL
     "password": "claveSegura123@",  # Contraseña de MySQL
     "database": "loginPS"  # Base de datos
