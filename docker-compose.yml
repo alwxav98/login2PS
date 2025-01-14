@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  login-service:
+    build:
+      context: .
+    container_name: login-service
+    ports:
+      - "5000:5000"  # Mapea el puerto 5000 del contenedor al host
+    restart: always  # Reinicia automáticamente el contenedor si falla o al reiniciar el host
+    environment:
+      - DATABASE_HOST=ec2-18-207-77-6.compute-1.amazonaws.com
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=claveSegura123@
+      - DATABASE_NAME=loginPS
