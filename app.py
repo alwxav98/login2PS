@@ -69,6 +69,9 @@ def login():
             # Guardar la sesión del usuario en Redis (con expiración)
             redis_client.set(token, email, ex=3600)  # Expira en 1 hora
 
+            # Imprime información del token en los logs
+            print(f"Token guardado en Redis: {token} -> {email}")
+
             # Configurar la cookie con el token
             response = redirect(url_for("success"))
             response.set_cookie("auth_token", token, max_age=3600, httponly=True)  # Configura la cookie con 1 hora de expiración
@@ -78,6 +81,7 @@ def login():
             return render_template("login.html", error="Email o contraseña incorrectos")
 
     return render_template("login.html")
+
 
 @app.route("/success")
 def success():
