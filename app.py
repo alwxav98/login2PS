@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
 from mysql.connector import Error
 import hashlib
+import redis
 
 app = Flask(__name__)
 
@@ -40,21 +41,40 @@ def verify_user(email, password):
             cursor.close()
             connection.close()
 
+# Configuración de Redis
+redis_client = redis.StrictRedis(
+    host="usercache-vgl1kg.serverless.use1.cache.amazonaws.com",  # Endpoint de ElastiCache
+    port=6379,  # Puerto de Redis
+    decode_responses=True  # Decodificar respuestas como strings
+)
+
+# Probar conexión
+try:
+    redis_client.ping()
+    print("Conexión exitosa a Redis")
+except redis.ConnectionError as e:
+    print(f"Error al conectar con Redis: {e}")
+
 @app.route("/", methods=["GET", "POST"])
 def login():
-    """
-    Muestra el formulario de login y procesa las credenciales ingresadas.
-    """
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
 
         if verify_user(email, password):
-            return redirect(url_for("success"))
+            # Generar un token único para el usuario
+            token = hashlib.sha256(email.encode()).hexdigest()
+
+            # Guardar la sesión del usuario en Redis (con expiración)
+            redis_client.set(token, email, ex=3600)  # Expira en 1 hora
+
+            # Configurar la cookie con el token
+            response = redirect(url_for("success"))
+            response.set_cookie("auth_token", token, max_age=3600)
+            return response
         else:
             return render_template("login.html", error="Email o contraseña incorrectos")
 
-    # Renderiza la plantilla HTML para login
     return render_template("login.html")
 
 @app.route("/success")
