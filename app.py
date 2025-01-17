@@ -71,7 +71,8 @@ def login():
 
             # Configurar la cookie con el token
             response = redirect(url_for("success"))
-            response.set_cookie("auth_token", token, max_age=3600)
+            response.set_cookie("auth_token", token, max_age=3600, httponly=True)  # Configura la cookie con 1 hora de expiración
+
             return response
         else:
             return render_template("login.html", error="Email o contraseña incorrectos")
