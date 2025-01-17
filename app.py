@@ -41,14 +41,15 @@ def verify_user(email, password):
             cursor.close()
             connection.close()
 
-# Configuración de Redis
+# Configuración del cliente Redis
 redis_client = redis.StrictRedis(
-    host="usercache-vgl1kg.serverless.use1.cache.amazonaws.com",  # Endpoint de ElastiCache
-    port=6379,  # Puerto de Redis
-    decode_responses=True  # Decodificar respuestas como strings
+    host="usercache-vgl1kg.serverless.use1.cache.amazonaws.com",
+    port=6379,
+    ssl=True,  # TLS habilitado
+    decode_responses=True  # Decodificar las respuestas como strings
 )
 
-# Probar conexión
+# Prueba la conexión
 try:
     redis_client.ping()
     print("Conexión exitosa a Redis")
