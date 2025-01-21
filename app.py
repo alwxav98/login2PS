@@ -9,11 +9,11 @@ app = Flask(__name__)
 
 CORS(app, supports_credentials=True)
 
-@app.after_request
-def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "http://ec2-44-206-224-199.compute-1.amazonaws.com"  # Cambia por la IP del servidor PHP
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+#@app.after_request
+#def add_cors_headers(response):
+    #response.headers["Access-Control-Allow-Origin"] = "http://ec2-44-206-224-199.compute-1.amazonaws.com"  # Cambia por la IP del servidor PHP
+    #response.headers["Access-Control-Allow-Credentials"] = "true"
+    #return response
 
 # Configuración de conexión a MySQL
 DB_CONFIG = {
