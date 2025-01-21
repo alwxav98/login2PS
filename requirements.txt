@@ -4,3 +4,5 @@ requests
 gunicorn
 Werkzeug
 redis
+CORS
+flask-cors
