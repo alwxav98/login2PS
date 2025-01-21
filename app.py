@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, make_response
 import mysql.connector
 from mysql.connector import Error
 import hashlib
@@ -9,11 +9,11 @@ app = Flask(__name__)
 
 CORS(app, supports_credentials=True)
 
-#@app.after_request
-#def add_cors_headers(response):
-    #response.headers["Access-Control-Allow-Origin"] = "http://ec2-44-206-224-199.compute-1.amazonaws.com"  # Cambia por la IP del servidor PHP
-    #response.headers["Access-Control-Allow-Credentials"] = "true"
-    #return response
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "http://127.0.0.1:5000"  # Cambia por la IP del servidor PHP
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 # Configuración de conexión a MySQL
 DB_CONFIG = {
@@ -25,7 +25,7 @@ DB_CONFIG = {
 
 # Configuración del cliente Redis
 redis_client = redis.StrictRedis(
-    host="ec2-54-166-148-10.compute-1.amazonaws.com",  # IP pública o privada de tu instancia EC2 con Redis
+    host="ec2-34-201-173-204.compute-1.amazonaws.com",  # IP pública o privada de tu instancia EC2 con Redis
     port=6379,
     password="claveSegura123@",
     decode_responses=True
@@ -74,9 +74,6 @@ def home():
 
 @app.route("/login", methods=["POST"])
 def login():
-    """
-    API REST para iniciar sesión.
-    """
     data = request.json
     email = data.get("email")
     password = data.get("password")
@@ -88,21 +85,27 @@ def login():
         token = hashlib.sha256(email.encode()).hexdigest()
         redis_client.setex(token, 3600, email)  # Expira en 1 hora
 
-        # Configurar una cookie con el token
-        response = jsonify({"message": "Inicio de sesión exitoso", "token": token})
-        response.set_cookie(
-            "auth_token",
-            token,
-            max_age=3600,  # Duración de 1 hora
-            httponly=True,  # Protección contra XSS
-            secure=False,  # Cambiar a True si usas HTTPS
-            samesite=None  # Permite que la cookie se envíe a diferentes orígenes
-        )
+        # Configurar la cookie con el token
+        response = make_response(redirect(f"http://ec2-3-84-234-66.compute-1.amazonaws.com/home.php?auth_token={token}"))
+        response.set_cookie("auth_token", token, httponly=True, samesite="Strict")
 
         return response
     else:
         return jsonify({"error": "Email o contraseña incorrectos"}), 401
 
+
+
+@app.route("/redirect_to_php", methods=["GET"])
+def redirect_to_php():
+    """
+    Redirige al servidor PHP con el token en la URL.
+    """
+    token = request.cookies.get("auth_token")  # Leer el token de la cookie
+    if not token:
+        return jsonify({"error": "No se encontró el token en las cookies"}), 401
+
+    # Redirigir al servidor PHP con el token como parámetro en la URL
+    return redirect(f"http://ec2-3-84-234-66.compute-1.amazonaws.com/home.php?auth_token={token}")
 
 
 @app.route("/verify", methods=["GET"])
@@ -119,7 +122,6 @@ def verify():
         return jsonify({"message": "Token válido", "email": email}), 200
     else:
         return jsonify({"error": "Token inválido o expirado"}), 401
-
 
 
 @app.route("/logout", methods=["POST"])
@@ -140,4 +142,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
