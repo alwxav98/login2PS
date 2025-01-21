@@ -84,12 +84,18 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+
+        .message {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #ff0000;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Login</h2>
-        <form action="/" method="POST">
+        <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" placeholder="Ingresa tu email" required>
@@ -100,8 +106,48 @@
             </div>
             <button type="submit" class="btn">Login</button>
         </form>
+        <p id="message" class="message"></p>
         <a href="/inicio" class="btn btn-secondary">Volver al Inicio</a>
     </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault(); // Evita el envío tradicional del formulario
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                const message = document.getElementById("message");
+
+                if (response.ok) {
+                    // Mostrar éxito y token devuelto
+                    message.style.color = "green";
+                    message.textContent = "Inicio de sesión exitoso. Token: " + result.token;
+
+                    // Puedes guardar el token en localStorage o enviarlo a otra función
+                    console.log("Token:", result.token);
+                } else {
+                    // Mostrar mensaje de error
+                    message.style.color = "red";
+                    message.textContent = result.error;
+                }
+            } catch (error) {
+                console.error("Error al conectar con la API:", error);
+                const message = document.getElementById("message");
+                message.style.color = "red";
+                message.textContent = "Error al conectar con el servidor.";
+            }
+        });
+    </script>
 </body>
 </html>
-
